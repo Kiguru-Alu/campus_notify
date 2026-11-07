@@ -8,9 +8,15 @@ Built with Flutter for ALU Rwanda.
 
 ## Screens
 
-| Home | Report | Detail | Staff queue |
-|---|---|---|---|
-| ![Home](docs/screenshots/home.png) | ![Report](docs/screenshots/report.png) | ![Detail](docs/screenshots/detail.png) | ![Queue](docs/screenshots/queue.png) |
+| Home | Reporting an issue | Following it |
+|---|---|---|
+| <img src="docs/screenshots/home.png" width="240"> | <img src="docs/screenshots/report-form.png" width="240"> | <img src="docs/screenshots/detail.png" width="240"> |
+
+Staff see a work queue instead of their own reports, and are the only role that can move a report through its lifecycle.
+
+| Work queue | Updating a status |
+|---|---|
+| <img src="docs/screenshots/staff-queue.png" width="240"> | <img src="docs/screenshots/staff-update.png" width="240"> |
 
 ## What it does
 
