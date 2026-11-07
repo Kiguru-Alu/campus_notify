@@ -1,3 +1,4 @@
+
 # Campus Notify
 
 A mobile app for reporting broken things on campus and following what happens to them.
@@ -10,13 +11,14 @@ Built with Flutter for ALU Rwanda.
 
 | Home | Reporting an issue | Following it |
 |---|---|---|
-| <img src="docs/screenshots/home.png" width="240"> | <img src="docs/screenshots/report-form.png" width="240"> | <img src="docs/screenshots/detail.png" width="240"> |
+| <img width="720" height="1600" alt="StudentHome" src="https://github.com/user-attachments/assets/2f74325a-9263-48fd-8789-b17ae1773632" />| <img width="720" height="1452" alt="ReportIssue" src="https://github.com/user-attachments/assets/b213d7f9-e78c-424e-8ba5-1970802fcd38" />| <img width="720" height="1465" alt="Queue" src="https://github.com/user-attachments/assets/1a17723c-74bd-47de-bebf-533b1ba76202" /> |
 
 Staff see a work queue instead of their own reports, and are the only role that can move a report through its lifecycle.
 
 | Work queue | Updating a status |
 |---|---|
-| <img src="docs/screenshots/staff-queue.png" width="240"> | <img src="docs/screenshots/staff-update.png" width="240"> |
+| <img width="720" height="1459" alt="StaffQueue" src="https://github.com/user-attachments/assets/3ba5b9dc-c347-4dd9-9f05-5d17dcbcc3e4" />
+ | <img width="720" height="1600" alt="UpdateStatus" src="https://github.com/user-attachments/assets/271e1724-6b2e-4e1b-852e-0a648c2b1c2d" /> |
 
 ## What it does
 
