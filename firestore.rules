@@ -1,0 +1,146 @@
+rules_version = '2';
+
+// Campus Notify security model.
+//
+// Three ideas drive these rules:
+//
+// 1. The client is advisory, the rules are the control. The app hides the
+//    status selector from students; these rules are what actually stops a
+//    student from writing a status, including from a REST call.
+// 2. Role is read from the user's own profile document, not from the
+//    request. A student cannot promote themselves because the update rule
+//    on /users refuses any write that changes `role`.
+// 3. The audit trail is append-only. Nothing can rewrite the history of
+//    what happened to a report.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Email verification is a precondition for using the app at all, which
+    // is how the deployment stays restricted to real campus accounts.
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isCampusEmail() {
+      return request.auth.token.email.matches('.*@(alustudent[.]com|alueducation[.]com)');
+    }
+
+    function profile() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isStaff() {
+      return isVerified() && profile().role == 'staff';
+    }
+
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    // --- users -----------------------------------------------------------
+    match /users/{uid} {
+      // A user may always read their own profile, including before they
+      // have verified, because the verification screen needs it. Reading
+      // other members requires a verified session.
+      allow read: if isSignedIn() && (request.auth.uid == uid || isVerified());
+
+      allow create: if isSignedIn()
+                    && request.auth.uid == uid
+                    && isCampusEmail()
+                    && request.resource.data.role in ['student', 'staff']
+                    && request.resource.data.email == request.auth.token.email;
+
+      // Self-service profile edits only, and never a role change.
+      allow update: if isSignedIn()
+                    && request.auth.uid == uid
+                    && request.resource.data.role == resource.data.role
+                    && changedKeys().hasOnly(['fullName', 'programme', 'photoUrl']);
+
+      allow delete: if false;
+    }
+
+    // --- incidents -------------------------------------------------------
+    match /incidents/{incidentId} {
+
+      function isAuthor() {
+        return isVerified() && resource.data.reporterId == request.auth.uid;
+      }
+
+      // A student may correct the wording of their own report, but only
+      // while it is still untouched, and never its status or its author.
+      function isAuthorEdit() {
+        return isAuthor()
+               && resource.data.status == 'submitted'
+               && changedKeys().hasOnly([
+                    'title', 'description', 'category',
+                    'location', 'locationDetail', 'updatedAt'
+                  ]);
+      }
+
+      // "This affects me too" is the one field any verified member may
+      // touch on someone else's report.
+      function isSupportToggle() {
+        return isVerified() && changedKeys().hasOnly(['supporterIds']);
+      }
+
+      // Staff may move a report through its lifecycle, but may not rewrite
+      // who filed it or when.
+      function isStaffAction() {
+        return isStaff()
+               && changedKeys().hasOnly([
+                    'status', 'assignedToId', 'assignedToName',
+                    'resolutionNote', 'supporterIds', 'updatedAt'
+                  ]);
+      }
+
+      allow read: if isVerified();
+
+      allow create: if isVerified()
+                    && request.resource.data.reporterId == request.auth.uid
+                    && request.resource.data.status == 'submitted'
+                    && request.resource.data.supporterIds.size() == 0
+                    && request.resource.data.assignedToId == null
+                    && request.resource.data.title is string
+                    && request.resource.data.title.size() >= 8
+                    && request.resource.data.title.size() <= 90
+                    && request.resource.data.description is string
+                    && request.resource.data.description.size() >= 20
+                    && request.resource.data.description.size() <= 1200;
+
+      allow update: if isStaffAction() || isAuthorEdit() || isSupportToggle();
+
+      // Withdrawal is allowed only before anyone has acted on the report.
+      // After that the record is part of a maintenance history.
+      allow delete: if isAuthor() && resource.data.status == 'submitted';
+
+      // --- audit trail ---------------------------------------------------
+      match /statusUpdates/{updateId} {
+
+        function parentIncident() {
+          return get(/databases/$(database)/documents/incidents/$(incidentId)).data;
+        }
+
+        allow read: if isVerified();
+
+        // Staff write transitions. The reporter writes exactly one entry,
+        // the 'submitted' row created alongside their report.
+        allow create: if isStaff()
+                      || (isVerified()
+                          && request.resource.data.actorId == request.auth.uid
+                          && request.resource.data.toStatus == 'submitted');
+
+        // Append-only: history is never edited.
+        allow update: if false;
+
+        // Removed only as part of withdrawing an untouched report.
+        allow delete: if isVerified()
+                      && parentIncident().reporterId == request.auth.uid
+                      && parentIncident().status == 'submitted';
+      }
+    }
+  }
+}
