@@ -215,6 +215,8 @@ class IncidentRepository {
         'Cannot reach the server. Check your connection.',
       'not-found' => 'That report no longer exists.',
       _ => 'Something went wrong. Try again.',
+      'failed-precondition' =>
+      'This list is not available yet. Try again shortly.',
     };
   }
 }
