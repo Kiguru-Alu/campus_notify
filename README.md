@@ -17,8 +17,7 @@ Staff see a work queue instead of their own reports, and are the only role that 
 
 | Work queue | Updating a status |
 |---|---|
-| <img width="720" height="1459" alt="StaffQueue" src="https://github.com/user-attachments/assets/3ba5b9dc-c347-4dd9-9f05-5d17dcbcc3e4" />
- | <img width="720" height="1600" alt="UpdateStatus" src="https://github.com/user-attachments/assets/271e1724-6b2e-4e1b-852e-0a648c2b1c2d" /> |
+| <img width="720" height="1459" alt="StaffQueue" src="https://github.com/user-attachments/assets/3ba5b9dc-c347-4dd9-9f05-5d17dcbcc3e4" />| <img width="720" height="1600" alt="UpdateStatus" src="https://github.com/user-attachments/assets/271e1724-6b2e-4e1b-852e-0a648c2b1c2d" /> |
 
 ## What it does
 
