@@ -106,13 +106,19 @@ class AuthRepository {
 
   /// Firebase caches this flag locally, so the server has to be asked again
   /// after the student taps the link in their inbox.
-  Future<bool> refreshEmailVerified() async {
+    Future<bool> refreshEmailVerified() async {
     final user = _auth.currentUser;
     if (user == null) return false;
     await user.reload();
-    return _auth.currentUser?.emailVerified ?? false;
+    final refreshed = _auth.currentUser;
+    if (refreshed != null && refreshed.emailVerified) {
+      // Force a new ID token so Firestore rules see email_verified: true.
+      await refreshed.getIdToken(true);
+      return true;
+    }
+    return false;
   }
-
+  
   Future<void> sendPasswordReset(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email.trim().toLowerCase());

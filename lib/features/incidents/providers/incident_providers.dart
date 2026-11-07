@@ -20,7 +20,7 @@ final imageRepositoryProvider = Provider<ImageRepository>((ref) {
   return repository;
 });
 
-// --- Raw data streams ------------------------------------------------------
+//  Raw data streams
 
 /// One Firestore listener serves every screen that lists reports. Riverpod
 /// disposes it when nothing is watching, so filtering never costs a read.
@@ -44,7 +44,7 @@ final statusUpdatesProvider =
   return ref.watch(incidentRepositoryProvider).watchStatusUpdates(incidentId);
 });
 
-// --- Derived views ---------------------------------------------------------
+// Derived views
 
 /// The argument for Riverpod in one provider: search and filter are a pure
 /// transformation of state that already exists, so they cost no extra query,
